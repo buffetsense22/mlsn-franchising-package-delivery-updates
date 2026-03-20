@@ -5,33 +5,19 @@
 <title>MLSN Dashboard</title>
 
 <style>
-* {
-    box-sizing: border-box;
-}
-
 body {
     margin: 0;
     font-family: Arial, sans-serif;
     background: #ffffff;
 }
 
-/* HEADER /
+/* PURPLE HEADER /
 .header {
-    background: #7c3aed;
+    background: #6d28d9;
     color: white;
     padding: 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.header img {
-    height: 40px;
-}
-
-.header h1 {
     font-size: 18px;
-    margin: 0;
+    font-weight: bold;
 }
 
 / CONTENT /
@@ -49,7 +35,7 @@ body {
 
 / BUTTON /
 .btn {
-    background: #7c3aed;
+    background: #6d28d9;
     color: white;
     padding: 12px;
     border: none;
@@ -66,9 +52,9 @@ table {
 }
 
 th {
-    text-align: left;
-    padding: 10px;
     background: #ede9fe;
+    padding: 10px;
+    text-align: left;
 }
 
 td {
@@ -76,7 +62,7 @@ td {
     border-bottom: 1px solid #ddd;
 }
 
-/ BADGES /
+/ STATUS COLORS /
 .badge {
     padding: 5px 10px;
     border-radius: 6px;
@@ -88,44 +74,16 @@ td {
 .orange { background: #f59e0b; }
 .gray { background: #6b7280; }
 
-/ MODAL /
-.modal {
-    display: none;
-    position: fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background: rgba(0,0,0,0.5);
-}
-
-.modal-content {
-    background: white;
-    margin: 60px auto;
-    padding: 20px;
-    width: 90%;
-    max-width: 400px;
-    border-radius: 10px;
-}
-
-/ INPUT */
+/ FORM */
 input {
     width: 100%;
     padding: 10px;
+    margin-top: 8px;
     margin-bottom: 10px;
     border-radius: 5px;
     border: 1px solid #ccc;
 }
 </style>
-
-<script>
-function openForm(){
-    document.getElementById("modal").style.display="block";
-}
-function closeForm(){
-    document.getElementById("modal").style.display="none";
-}
-</script>
 
 </head>
 
@@ -133,65 +91,64 @@ function closeForm(){
 
 <!-- HEADER -->
 <div class="header">
-    <h1>MLSN Franchising Solution Corp.</h1>
+MLSN Franchising Solution Corp.
 </div>
 
-<!-- CONTENT -->
 <div class="container">
 
-    <div class="card">
-        <strong>📊 Dashboard</strong><br><br>
-        Total Releases: 12<br>
-        Tomorrow: 3
-    </div>
-
-    <button class="btn" onclick="openForm()">➕ Request Package</button>
-
-    <div class="card">
-        <strong>📦 Release Table</strong>
-
-        <table>
-            <tr>
-                <th>Name</th>
-                <th>Location</th>
-                <th>Status</th>
-            </tr>
-
-            <tr>
-                <td>Juan Dela Cruz</td>
-                <td>Manila</td>
-                <td><span class="badge green">Today</span></td>
-            </tr>
-
-            <tr>
-                <td>Maria Santos</td>
-                <td>Baguio</td>
-                <td><span class="badge orange">Tomorrow</span></td>
-            </tr>
-
-            <tr>
-                <td>Pedro Reyes</td>
-                <td>Cebu</td>
-                <td><span class="badge gray">Pending</span></td>
-            </tr>
-        </table>
-
-    </div>
-
+<!-- DASHBOARD -->
+<div class="card">
+<b>📊 Dashboard</b><br><br>
+Total Releases: 12<br>
+Tomorrow: 3
 </div>
 
-<!-- MODAL -->
-<div id="modal" class="modal">
-    <div class="modal-content">
-        <h3>📦 Request Package</h3>
+<!-- BUTTON -->
+<button class="btn">➕ Request Package</button>
 
-        <input type="text" placeholder="Franchisee Name">
-        <input type="text" placeholder="Location">
-        <input type="date">
+<!-- TABLE -->
+<div class="card">
+<b>📦 Release Table</b>
 
-        <button class="btn">Submit</button>
-        <button onclick="closeForm()">Cancel</button>
-    </div>
+<table>
+<tr>
+<th>Name</th>
+<th>Location</th>
+<th>Status</th>
+</tr>
+
+<tr>
+<td>Juan Dela Cruz</td>
+<td>Manila</td>
+<td><span class="badge green">Today</span></td>
+</tr>
+
+<tr>
+<td>Maria Santos</td>
+<td>Baguio</td>
+<td><span class="badge orange">Tomorrow</span></td>
+</tr>
+
+<tr>
+<td>Pedro Reyes</td>
+<td>Cebu</td>
+<td><span class="badge gray">Pending</span></td>
+</tr>
+
+</table>
+</div>
+
+<!-- FORM -->
+<div class="card">
+<b>📦 Request Package</b>
+
+<input type="text" placeholder="Franchisee Name">
+<input type="text" placeholder="Location">
+<input type="date">
+
+<button class="btn">Submit Request</button>
+</div>
+
 </div>
 
 </body>
