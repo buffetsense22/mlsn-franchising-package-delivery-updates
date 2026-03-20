@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>MLSN Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MLSN Dashboard</title>
 
 <style>
+* {
+    box-sizing: border-box;
+}
+
 body {
-    font-family: Arial;
-    background: #ffffff;
     margin: 0;
+    font-family: Arial, sans-serif;
+    background: #ffffff;
 }
 
 /* HEADER /
@@ -22,7 +26,7 @@ body {
 }
 
 .header img {
-    height: 45px;
+    height: 40px;
 }
 
 .header h1 {
@@ -30,14 +34,14 @@ body {
     margin: 0;
 }
 
-/ CONTAINER /
+/ CONTENT /
 .container {
     padding: 15px;
 }
 
 / CARD /
 .card {
-    background: #f9f9f9;
+    background: #f3f4f6;
     padding: 15px;
     border-radius: 10px;
     margin-bottom: 15px;
@@ -47,15 +51,24 @@ body {
 .btn {
     background: #7c3aed;
     color: white;
-    padding: 10px 15px;
+    padding: 12px;
     border: none;
     border-radius: 8px;
-    cursor: pointer;
+    width: 100%;
+    font-size: 14px;
+    margin-bottom: 15px;
 }
 
 / TABLE /
 table {
     width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    padding: 10px;
+    background: #ede9fe;
 }
 
 td {
@@ -63,7 +76,7 @@ td {
     border-bottom: 1px solid #ddd;
 }
 
-/ STATUS /
+/ BADGES /
 .badge {
     padding: 5px 10px;
     border-radius: 6px;
@@ -88,7 +101,7 @@ td {
 
 .modal-content {
     background: white;
-    margin: 50px auto;
+    margin: 60px auto;
     padding: 20px;
     width: 90%;
     max-width: 400px;
@@ -109,7 +122,6 @@ input {
 function openForm(){
     document.getElementById("modal").style.display="block";
 }
-
 function closeForm(){
     document.getElementById("modal").style.display="none";
 }
@@ -121,47 +133,54 @@ function closeForm(){
 
 <!-- HEADER -->
 <div class="header">
-    <img src="logo.png">
     <h1>MLSN Franchising Solution Corp.</h1>
 </div>
 
+<!-- CONTENT -->
 <div class="container">
 
-    <!-- DASHBOARD -->
     <div class="card">
-        <b>📊 Dashboard</b><br>
+        <strong>📊 Dashboard</strong><br><br>
         Total Releases: 12<br>
         Tomorrow: 3
     </div>
 
-    <!-- BUTTON -->
     <button class="btn" onclick="openForm()">➕ Request Package</button>
 
-    <!-- TABLE -->
     <div class="card">
-        <h3>📦 Releases</h3>
+        <strong>📦 Release Table</strong>
+
         <table>
+            <tr>
+                <th>Name</th>
+                <th>Location</th>
+                <th>Status</th>
+            </tr>
+
             <tr>
                 <td>Juan Dela Cruz</td>
                 <td>Manila</td>
                 <td><span class="badge green">Today</span></td>
             </tr>
+
             <tr>
                 <td>Maria Santos</td>
                 <td>Baguio</td>
                 <td><span class="badge orange">Tomorrow</span></td>
             </tr>
+
             <tr>
                 <td>Pedro Reyes</td>
                 <td>Cebu</td>
                 <td><span class="badge gray">Pending</span></td>
             </tr>
         </table>
+
     </div>
 
 </div>
 
-<!-- MODAL FORM -->
+<!-- MODAL -->
 <div id="modal" class="modal">
     <div class="modal-content">
         <h3>📦 Request Package</h3>
@@ -170,64 +189,10 @@ function closeForm(){
         <input type="text" placeholder="Location">
         <input type="date">
 
-        <button class="btn">Submit Request</button>
-        <br><br>
+        <button class="btn">Submit</button>
         <button onclick="closeForm()">Cancel</button>
     </div>
 </div>
-
-</body>
-</html>
-<div class="header">
-    <img src="logo.png" class="logo">
-    <div>
-        <h1>MLSN Franchising Solution Corp.</h1>
-        <div class="tagline">"Your PLAN, Our GOAL"</div>
-    </div>
-</div>
-
-<div class="card">
-📊 Total Releases: 12<br>
-⚠️ Tomorrow: 3
-</div>
-
-<div class="card">
-<h3>📊 Analytics</h3>
-<canvas id="chart"></canvas>
-</div>
-
-<div class="card">
-<h3>📋 Releases</h3>
-<table>
-<tr>
-<td>John Doe</td>
-<td>Manila</td>
-<td><span class="badge green">Today</span></td>
-</tr>
-<tr>
-<td>Jane Smith</td>
-<td>Baguio</td>
-<td><span class="badge orange">Tomorrow</span></td>
-</tr>
-<tr>
-<td>Mark Lee</td>
-<td>Cebu</td>
-<td><span class="badge gray">Upcoming</span></td>
-</tr>
-</table>
-</div>
-
-<script>
-new Chart(document.getElementById('chart'), {
-    type: 'bar',
-    data: {
-        labels: ['Today','Tomorrow','Pending','Released'],
-        datasets: [{
-            data: [5,3,4,6]
-        }]
-    }
-});
-</script>
 
 </body>
 </html>
