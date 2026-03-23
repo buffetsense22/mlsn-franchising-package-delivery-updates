@@ -2,154 +2,60 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MLSN Dashboard</title>
-
+<title>MLSN System</title>
 <style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #ffffff;
-}
-
-/* PURPLE HEADER /
-.header {
-    background: #6d28d9;
-    color: white;
-    padding: 15px;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-/ CONTENT /
-.container {
-    padding: 15px;
-}
-
-/ CARD /
-.card {
-    background: #f3f4f6;
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 15px;
-}
-
-/ BUTTON /
-.btn {
-    background: #6d28d9;
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    width: 100%;
-    font-size: 14px;
-    margin-bottom: 15px;
-}
-
-/ TABLE /
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th {
-    background: #ede9fe;
-    padding: 10px;
-    text-align: left;
-}
-
-td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-}
-
-/ STATUS COLORS /
-.badge {
-    padding: 5px 10px;
-    border-radius: 6px;
-    color: white;
-    font-size: 12px;
-}
-
-.green { background: #22c55e; }
-.orange { background: #f59e0b; }
-.gray { background: #6b7280; }
-
-/ FORM */
-input {
-    width: 100%;
-    padding: 10px;
-    margin-top: 8px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
+body{margin:0;font-family:Arial;background:#fff;}
+.header{background:#6d28d9;color:#fff;padding:15px;font-weight:bold;}
+.container{padding:15px;}
+.card{background:#f3f4f6;padding:15px;border-radius:10px;margin-bottom:15px;}
+.btn{background:#6d28d9;color:white;padding:10px;border:none;width:100%;border-radius:8px;margin-top:10px;}
+table{width:100%;border-collapse:collapse;}
+th{background:#ede9fe;padding:10px;text-align:left;}
+td{padding:10px;border-bottom:1px solid #ddd;}
+input{width:100%;padding:10px;margin-top:8px;border-radius:5px;border:1px solid #ccc;}
 </style>
-
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
-
 <body>
-
-<!-- HEADER -->
-<div class="header">
-MLSN Franchising Solution Corp.
-</div>
-
+<div class="header">MLSN Franchising System</div>
 <div class="container">
-
-<!-- DASHBOARD -->
-<div class="card">
-<b>📊 Dashboard</b><br><br>
-Total Releases: 12<br>
-Tomorrow: 3
-</div>
-
-<!-- BUTTON -->
-<button class="btn">➕ Request Package</button>
-
-<!-- TABLE -->
-<div class="card">
-<b>📦 Release Table</b>
-
-<table>
-<tr>
-<th>Name</th>
-<th>Location</th>
-<th>Status</th>
-</tr>
-
-<tr>
-<td>Juan Dela Cruz</td>
-<td>Manila</td>
-<td><span class="badge green">Today</span></td>
-</tr>
-
-<tr>
-<td>Maria Santos</td>
-<td>Baguio</td>
-<td><span class="badge orange">Tomorrow</span></td>
-</tr>
-
-<tr>
-<td>Pedro Reyes</td>
-<td>Cebu</td>
-<td><span class="badge gray">Pending</span></td>
-</tr>
-
-</table>
-</div>
-
-<!-- FORM -->
 <div class="card">
 <b>📦 Request Package</b>
-
-<input type="text" placeholder="Franchisee Name">
-<input type="text" placeholder="Location">
-<input type="date">
-
-<button class="btn">Submit Request</button>
+<input id="name" placeholder="Franchisee Name">
+<input id="loc" placeholder="Location">
+<input id="date" type="date">
+<button class="btn" onclick="addData()">➕ Add Request</button>
 </div>
-
+<div class="card">
+<b>📋 Live Requests</b>
+<table>
+<tr><th>Name</th><th>Location</th><th>Date</th></tr>
+<tbody id="table"></tbody>
+</table>
 </div>
-
+</div>
+<script>
+const firebaseConfig={apiKey:"AIzaSyCM6S_RNVOx5Ru2qEt5jjM4TP2GMOgtfKk",authDomain:"mlsn-system-ce163.firebaseapp.com",projectId:"mlsn-system-ce163",storageBucket:"mlsn-system-ce163.firebasestorage.app",messagingSenderId:"987837778134",appId:"1:987837778134:web:3e0ab8d840781b4cfea177",measurementId:"G-0QQ8E9JPYR"};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
+function addData(){
+let name=document.getElementById("name").value;
+let loc=document.getElementById("loc").value;
+let date=document.getElementById("date").value;
+if(!name||!loc||!date){alert("Please fill all fields");return;}
+db.collection("requests").add({name:name,location:loc,date:date,created:new Date()});
+alert("✅ Request Added!");
+}
+db.collection("requests").orderBy("created","desc").onSnapshot(snapshot=>{
+let html="";
+snapshot.forEach(doc=>{
+let d=doc.data();
+html+=`<tr><td>${d.name}</td><td>${d.location}</td><td>${d.date}</td></tr>`;
+});
+document.getElementById("table").innerHTML=html;
+});
+</script>
 </body>
 </html>
+
