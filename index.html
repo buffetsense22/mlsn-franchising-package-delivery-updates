@@ -2,9 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MLSN Ultimate App</title>
-
-<link rel="manifest" href="manifest.json">
+<title>MLSN App</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -12,14 +10,15 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
 <style>
-:root{--bg:#f8fafc;--card:#fff;--text:#111;--primary:#6d28d9;}
-.dark{--bg:#0f172a;--card:#1e293b;--text:#fff;}
-
-body{margin:0;font-family:Segoe UI;background:var(--bg);color:var(--text);}
+body{
+margin:0;
+font-family:Segoe UI;
+background:#f8fafc;
+}
 
 /* HEADER */
 .header{
-background:var(--primary);
+background:#6d28d9;
 color:white;
 padding:15px;
 display:flex;
@@ -31,7 +30,7 @@ justify-content:space-between;
 position:fixed;
 width:200px;
 height:100%;
-background:var(--primary);
+background:#6d28d9;
 color:white;
 padding:15px;
 }
@@ -53,24 +52,23 @@ padding:15px;
 
 /* CARD */
 .card{
-background:var(--card);
+background:white;
 padding:15px;
 border-radius:12px;
 margin-bottom:15px;
-box-shadow:0 5px 20px rgba(0,0,0,0.1);
 }
 
 /* GRID */
 .grid{
 display:grid;
-grid-template-columns:repeat(4,1fr);
+grid-template-columns:repeat(2,1fr);
 gap:10px;
 }
 .stat{
 text-align:center;
 padding:10px;
 border-radius:10px;
-background:var(--card);
+background:#eee;
 }
 
 /* INPUT */
@@ -84,7 +82,7 @@ border:1px solid #ccc;
 
 /* BUTTON */
 .btn{
-background:var(--primary);
+background:#6d28d9;
 color:white;
 padding:10px;
 border:none;
@@ -93,31 +91,12 @@ width:100%;
 margin-top:10px;
 }
 
-/* TABLE */
-td{
-padding:10px;
-border-bottom:1px solid #ddd;
-}
-
 /* BADGE */
 .badge{padding:5px 10px;border-radius:8px;color:white;}
 .pending{background:#6b7280;}
 .released{background:#22c55e;}
 .delayed{background:#ef4444;}
 
-/* TOAST */
-.toast{
-position:fixed;
-bottom:20px;
-right:20px;
-background:var(--primary);
-color:white;
-padding:10px;
-border-radius:10px;
-display:none;
-}
-
-/* MOBILE */
 @media(max-width:768px){
 .sidebar{display:none;}
 .main{margin:0;}
@@ -128,7 +107,7 @@ display:none;
 <body>
 
 <!-- LOGIN -->
-<div id="login" style="padding:20px;">
+<div id="login">
 <div class="card">
 <h3>Login</h3>
 <input id="email" placeholder="Email">
@@ -141,11 +120,8 @@ display:none;
 <div id="app" style="display:none">
 
 <div class="header">
-MLSN App
-<div>
-<button onclick="toggleDark()">🌙</button>
+MLSN Dashboard
 <button onclick="logout()">Logout</button>
-</div>
 </div>
 
 <div class="sidebar">
@@ -158,10 +134,10 @@ MLSN App
 <!-- DASHBOARD -->
 <div id="dashboard">
 <div class="grid">
-<div class="stat">Total<br><b id="total"></b></div>
-<div class="stat">Pending<br><b id="pending"></b></div>
-<div class="stat">Released<br><b id="released"></b></div>
-<div class="stat">Delayed<br><b id="delayed"></b></div>
+<div class="stat">Total<br><b id="total">0</b></div>
+<div class="stat">Pending<br><b id="pending">0</b></div>
+<div class="stat">Released<br><b id="released">0</b></div>
+<div class="stat">Delayed<br><b id="delayed">0</b></div>
 </div>
 
 <div class="card">
@@ -188,8 +164,6 @@ MLSN App
 </div>
 </div>
 
-<div id="toast" class="toast"></div>
-
 <script>
 const firebaseConfig={
 apiKey:"AIzaSyCM6S_RNVOx5Ru2qEt5jjM4TP2GMOgtfKk",
@@ -203,17 +177,18 @@ const db=firebase.firestore();
 const auth=firebase.auth();
 
 let role="";
+let myChart=null;
 
-// ✅ FIXED LOGIN FUNCTION
+// ✅ FIXED LOGIN
 function loginUser(){
-const emailVal=document.getElementById("email").value;
-const passVal=document.getElementById("password").value;
+const email=document.getElementById("email").value;
+const pass=document.getElementById("password").value;
 
-auth.signInWithEmailAndPassword(emailVal,passVal)
+auth.signInWithEmailAndPassword(email,pass)
 .then(()=>{
 
-if(emailVal.includes("admin")) role="admin";
-else if(emailVal.includes("release")) role="releasing";
+if(email.includes("admin")) role="admin";
+else if(email.includes("release")) role="releasing";
 else role="supervisor";
 
 if(role!=="admin"){
@@ -228,14 +203,7 @@ document.getElementById("app").style.display="block";
 }
 
 // LOGOUT
-function logout(){
-location.reload();
-}
-
-// DARK MODE
-function toggleDark(){
-document.body.classList.toggle("dark");
-}
+function logout(){location.reload();}
 
 // ADD DATA
 function addData(){
@@ -246,7 +214,6 @@ date:document.getElementById("date").value,
 status:"Pending",
 created:new Date()
 });
-toast("Added");
 }
 
 // REALTIME
@@ -282,10 +249,10 @@ document.getElementById("pending").innerText=p;
 document.getElementById("released").innerText=r;
 document.getElementById("delayed").innerText=d;
 
-// FIX chart re-render bug
-if(window.myChart) window.myChart.destroy();
+// FIX CHART BUG
+if(myChart) myChart.destroy();
 
-window.myChart=new Chart(document.getElementById("chart"),{
+myChart=new Chart(document.getElementById("chart"),{
 type:"bar",
 data:{
 labels:["Pending","Released","Delayed"],
@@ -295,30 +262,16 @@ datasets:[{data:[p,r,d]}]
 
 });
 
-// UPDATE STATUS
+// UPDATE
 function update(id,status){
 db.collection("requests").doc(id).update({status});
-toast("Updated");
 }
 
 // NAV
-function showPage(p){
+function showPage(page){
 document.getElementById("dashboard").style.display="none";
 document.getElementById("requests").style.display="none";
-document.getElementById(p).style.display="block";
-}
-
-// TOAST
-function toast(msg){
-let t=document.getElementById("toast");
-t.innerText=msg;
-t.style.display="block";
-setTimeout(()=>t.style.display="none",2000);
-}
-
-// SERVICE WORKER
-if('serviceWorker' in navigator){
-navigator.serviceWorker.register('service-worker.js');
+document.getElementById(page).style.display="block";
 }
 </script>
 
