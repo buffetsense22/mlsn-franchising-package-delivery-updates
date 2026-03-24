@@ -2,171 +2,53 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MLSN Ultimate App</title>
+<title>MLSN App</title>
 
-<!-- Manifest -->
 <link rel="manifest" href="manifest.json">
 
-<!-- Chart -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
 <style>
-:root{
---bg:#f8fafc;
---card:#fff;
---text:#111;
---primary:#6d28d9;
-}
-.dark{
---bg:#0f172a;
---card:#1e293b;
---text:#fff;
-}
-body{
-margin:0;
-font-family:Segoe UI;
-background:var(--bg);
-color:var(--text);
-transition:0.3s;
-}
-
-/* HEADER */
-.header{
-background:var(--primary);
-color:white;
-padding:15px;
-display:flex;
-justify-content:space-between;
-}
-
-/* SIDEBAR */
-.sidebar{
-position:fixed;
-width:200px;
-height:100%;
-background:var(--primary);
-color:white;
-padding:15px;
-}
-.sidebar button{
-width:100%;
-margin-top:10px;
-padding:10px;
-border:none;
-border-radius:8px;
-background:#8b5cf6;
-color:white;
-}
-
-/* MAIN */
-.main{
-margin-left:210px;
-padding:15px;
-}
-
-/* CARD */
-.card{
-background:var(--card);
-padding:15px;
-border-radius:12px;
-margin-bottom:15px;
-box-shadow:0 5px 20px rgba(0,0,0,0.1);
-animation:fade 0.4s;
-}
-
-/* GRID */
-.grid{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:10px;
-}
-.stat{
-text-align:center;
-padding:10px;
-border-radius:10px;
-background:var(--card);
-}
-
-/* INPUT */
-input,select{
-width:100%;
-padding:10px;
-margin-top:8px;
-border-radius:8px;
-border:1px solid #ccc;
-}
-
-/* BUTTON */
-.btn{
-background:var(--primary);
-color:white;
-padding:10px;
-border:none;
-border-radius:8px;
-width:100%;
-margin-top:10px;
-}
-
-/* TABLE */
-td{
-padding:10px;
-border-bottom:1px solid #ddd;
-}
-
-/* BADGE */
+:root{--bg:#f8fafc;--card:#fff;--text:#111;--primary:#6d28d9;}
+.dark{--bg:#0f172a;--card:#1e293b;--text:#fff;}
+body{margin:0;font-family:Segoe UI;background:var(--bg);color:var(--text);}
+.header{background:var(--primary);color:white;padding:15px;display:flex;justify-content:space-between;}
+.sidebar{position:fixed;width:200px;height:100%;background:var(--primary);color:white;padding:15px;}
+.sidebar button{width:100%;margin-top:10px;padding:10px;border:none;border-radius:8px;background:#8b5cf6;color:white;}
+.main{margin-left:210px;padding:15px;}
+.card{background:var(--card);padding:15px;border-radius:12px;margin-bottom:15px;}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.stat{text-align:center;padding:10px;border-radius:10px;background:var(--card);}
+input,select{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #ccc;}
+.btn{background:var(--primary);color:white;padding:10px;border:none;border-radius:8px;width:100%;margin-top:10px;}
+td{padding:10px;border-bottom:1px solid #ddd;}
 .badge{padding:5px 10px;border-radius:8px;color:white;}
 .pending{background:#6b7280;}
 .released{background:#22c55e;}
 .delayed{background:#ef4444;}
-
-/* TOAST */
-.toast{
-position:fixed;
-bottom:20px;
-right:20px;
-background:var(--primary);
-color:white;
-padding:10px;
-border-radius:10px;
-display:none;
-}
-
-/* ANIMATION */
-@keyframes fade{
-from{opacity:0;transform:translateY(10px);}
-to{opacity:1;}
-}
-
-/* MOBILE */
-@media(max-width:768px){
-.sidebar{display:none;}
-.main{margin:0;}
-}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--primary);color:white;padding:10px;border-radius:10px;display:none;}
+@media(max-width:768px){.sidebar{display:none}.main{margin:0}}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
 <div id="login" style="padding:20px;">
 <div class="card">
 <h3>Login</h3>
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
+<input id="email">
+<input id="password" type="password">
 <button class="btn" onclick="login()">Login</button>
 </div>
 </div>
 
-<!-- APP -->
 <div id="app" style="display:none">
 
 <div class="header">
-MLSN App
+MLSN
 <div>
 <button onclick="toggleDark()">🌙</button>
 <button onclick="logout()">Logout</button>
@@ -180,9 +62,7 @@ MLSN App
 
 <div class="main">
 
-<!-- DASHBOARD -->
 <div id="dashboard">
-
 <div class="grid">
 <div class="stat">Total<br><b id="total"></b></div>
 <div class="stat">Pending<br><b id="pending"></b></div>
@@ -190,13 +70,9 @@ MLSN App
 <div class="stat">Delayed<br><b id="delayed"></b></div>
 </div>
 
-<div class="card">
-<canvas id="chart"></canvas>
+<div class="card"><canvas id="chart"></canvas></div>
 </div>
 
-</div>
-
-<!-- REQUESTS -->
 <div id="requests" style="display:none">
 
 <div id="form" class="card">
@@ -206,9 +82,7 @@ MLSN App
 <button class="btn" onclick="addData()">Add</button>
 </div>
 
-<div class="card">
-<table id="table"></table>
-</div>
+<div class="card"><table id="table"></table></div>
 
 </div>
 
@@ -230,35 +104,24 @@ const auth=firebase.auth();
 
 let role="";
 
-// LOGIN
 function login(){
 auth.signInWithEmailAndPassword(email.value,password.value)
 .then(()=>{
-detectRole(email.value);
-login.style.display="none";
-app.style.display="block";
-})
-.catch(()=>alert("Login failed"));
-}
-
-// ROLE
-function detectRole(email){
-if(email.includes("admin")) role="admin";
-else if(email.includes("release")) role="releasing";
+if(email.value.includes("admin")) role="admin";
+else if(email.value.includes("release")) role="releasing";
 else role="supervisor";
 
 if(role!=="admin") form.style.display="none";
+
+login.style.display="none";
+app.style.display="block";
+})
+.catch(e=>alert(e.message));
 }
 
-// LOGOUT
 function logout(){location.reload();}
+function toggleDark(){document.body.classList.toggle("dark");}
 
-// DARK MODE
-function toggleDark(){
-document.body.classList.toggle("dark");
-}
-
-// ADD DATA
 function addData(){
 db.collection("requests").add({
 name:name.value,
@@ -267,10 +130,9 @@ date:date.value,
 status:"Pending",
 created:new Date()
 });
-toast("Added!");
+toast("Added");
 }
 
-// REALTIME
 db.collection("requests").orderBy("created","desc")
 .onSnapshot(snap=>{
 let html="",t=0,p=0,r=0,d=0;
@@ -286,9 +148,9 @@ let badge=`<span class="badge ${x.status.toLowerCase()}">${x.status}</span>`;
 
 if(role==="releasing"){
 badge=`<select onchange="update('${doc.id}',this.value)">
-<option ${x.status=="Pending"?"selected":""}>Pending</option>
-<option ${x.status=="Released"?"selected":""}>Released</option>
-<option ${x.status=="Delayed"?"selected":""}>Delayed</option>
+<option>Pending</option>
+<option>Released</option>
+<option>Delayed</option>
 </select>`;
 }
 
@@ -296,33 +158,28 @@ html+=`<tr><td>${x.name}</td><td>${badge}</td></tr>`;
 });
 
 table.innerHTML=html;
-
 total.innerText=t;
 pending.innerText=p;
 released.innerText=r;
 delayed.innerText=d;
 
-new Chart(chart,{
-type:"bar",
+new Chart(chart,{type:"bar",
 data:{labels:["Pending","Released","Delayed"],
-datasets:[{data:[p,r,d]}]}
-});
+datasets:[{data:[p,r,d]}]}});
+
 });
 
-// UPDATE
 function update(id,status){
-db.collection("requests").doc(id).update({status:status});
-toast("Updated!");
+db.collection("requests").doc(id).update({status});
+toast("Updated");
 }
 
-// NAV
 function showPage(p){
 dashboard.style.display="none";
 requests.style.display="none";
 document.getElementById(p).style.display="block";
 }
 
-// TOAST
 function toast(msg){
 let t=document.getElementById("toast");
 t.innerText=msg;
@@ -330,7 +187,6 @@ t.style.display="block";
 setTimeout(()=>t.style.display="none",2000);
 }
 
-// SERVICE WORKER (PWA)
 if('serviceWorker' in navigator){
 navigator.serviceWorker.register('service-worker.js');
 }
