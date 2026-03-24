@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MLSN App</title>
+<title>MLSN System</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -10,158 +10,39 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
 <style>
-body{
-margin:0;
-font-family:Segoe UI;
-background:#f8fafc;
-}
-
-/* HEADER */
-.header{
-background:#6d28d9;
-color:white;
-padding:15px;
-display:flex;
-justify-content:space-between;
-}
-
-/* SIDEBAR */
-.sidebar{
-position:fixed;
-width:200px;
-height:100%;
-background:#6d28d9;
-color:white;
-padding:15px;
-}
-.sidebar button{
-width:100%;
-margin-top:10px;
-padding:10px;
-border:none;
-border-radius:8px;
-background:#8b5cf6;
-color:white;
-}
-
-/* MAIN */
-.main{
-margin-left:210px;
-padding:15px;
-}
-
-/* CARD */
-.card{
-background:white;
-padding:15px;
-border-radius:12px;
-margin-bottom:15px;
-}
-
-/* GRID */
-.grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:10px;
-}
-.stat{
-text-align:center;
-padding:10px;
-border-radius:10px;
-background:#eee;
-}
-
-/* INPUT */
-input,select{
-width:100%;
-padding:10px;
-margin-top:8px;
-border-radius:8px;
-border:1px solid #ccc;
-}
-
-/* BUTTON */
-.btn{
-background:#6d28d9;
-color:white;
-padding:10px;
-border:none;
-border-radius:8px;
-width:100%;
-margin-top:10px;
-}
-
-/* BADGE */
-.badge{padding:5px 10px;border-radius:8px;color:white;}
-.pending{background:#6b7280;}
-.released{background:#22c55e;}
-.delayed{background:#ef4444;}
-
-@media(max-width:768px){
-.sidebar{display:none;}
-.main{margin:0;}
-}
+body{font-family:Segoe UI;margin:0;background:#f3f4f6;}
+.card{background:white;padding:15px;border-radius:12px;margin:15px;}
+.btn{background:#6d28d9;color:white;padding:10px;border:none;border-radius:8px;width:100%;}
+input{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #ccc;}
+.header{background:#6d28d9;color:white;padding:15px;}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
 <div id="login">
 <div class="card">
 <h3>Login</h3>
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
+<input id="email">
+<input id="password" type="password">
 <button class="btn" onclick="loginUser()">Login</button>
 </div>
 </div>
 
-<!-- APP -->
 <div id="app" style="display:none">
 
-<div class="header">
-MLSN Dashboard
-<button onclick="logout()">Logout</button>
-</div>
-
-<div class="sidebar">
-<button onclick="showPage('dashboard')">Dashboard</button>
-<button onclick="showPage('requests')">Requests</button>
-</div>
-
-<div class="main">
-
-<!-- DASHBOARD -->
-<div id="dashboard">
-<div class="grid">
-<div class="stat">Total<br><b id="total">0</b></div>
-<div class="stat">Pending<br><b id="pending">0</b></div>
-<div class="stat">Released<br><b id="released">0</b></div>
-<div class="stat">Delayed<br><b id="delayed">0</b></div>
-</div>
+<div class="header">Dashboard</div>
 
 <div class="card">
-<canvas id="chart"></canvas>
-</div>
-</div>
-
-<!-- REQUESTS -->
-<div id="requests" style="display:none">
-
-<div id="form" class="card">
-<input id="name" placeholder="Name">
-<input id="loc" placeholder="Location">
-<input id="date" type="date">
-<button class="btn" onclick="addData()">Add</button>
+<h4>Add Request</h4>
+<input id="name">
+<button class="btn" onclick="addData()">Submit</button>
 </div>
 
 <div class="card">
 <table id="table"></table>
 </div>
 
-</div>
-
-</div>
 </div>
 
 <script>
@@ -172,107 +53,36 @@ projectId:"mlsn-system-ce163"
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const db=firebase.firestore();
 const auth=firebase.auth();
 
-let role="";
-let myChart=null;
-
-// ✅ FIXED LOGIN
 function loginUser(){
 const email=document.getElementById("email").value;
 const pass=document.getElementById("password").value;
 
 auth.signInWithEmailAndPassword(email,pass)
 .then(()=>{
-
-if(email.includes("admin")) role="admin";
-else if(email.includes("release")) role="releasing";
-else role="supervisor";
-
-if(role!=="admin"){
-document.getElementById("form").style.display="none";
-}
-
 document.getElementById("login").style.display="none";
 document.getElementById("app").style.display="block";
-
 })
 .catch(e=>alert(e.message));
 }
 
-// LOGOUT
-function logout(){location.reload();}
-
-// ADD DATA
 function addData(){
 db.collection("requests").add({
 name:document.getElementById("name").value,
-location:document.getElementById("loc").value,
-date:document.getElementById("date").value,
-status:"Pending",
 created:new Date()
 });
 }
 
-// REALTIME
-db.collection("requests").orderBy("created","desc")
-.onSnapshot(snap=>{
-let html="",t=0,p=0,r=0,d=0;
-
+db.collection("requests").onSnapshot(snap=>{
+let html="";
 snap.forEach(doc=>{
-let x=doc.data();
-t++;
-
-if(x.status==="Pending")p++;
-if(x.status==="Released")r++;
-if(x.status==="Delayed")d++;
-
-let badge=`<span class="badge ${x.status.toLowerCase()}">${x.status}</span>`;
-
-if(role==="releasing"){
-badge=`<select onchange="update('${doc.id}',this.value)">
-<option ${x.status==="Pending"?"selected":""}>Pending</option>
-<option ${x.status==="Released"?"selected":""}>Released</option>
-<option ${x.status==="Delayed"?"selected":""}>Delayed</option>
-</select>`;
-}
-
-html+=`<tr><td>${x.name}</td><td>${badge}</td></tr>`;
+let d=doc.data();
+html+=`<tr><td>${d.name}</td></tr>`;
 });
-
 document.getElementById("table").innerHTML=html;
-
-document.getElementById("total").innerText=t;
-document.getElementById("pending").innerText=p;
-document.getElementById("released").innerText=r;
-document.getElementById("delayed").innerText=d;
-
-// FIX CHART BUG
-if(myChart) myChart.destroy();
-
-myChart=new Chart(document.getElementById("chart"),{
-type:"bar",
-data:{
-labels:["Pending","Released","Delayed"],
-datasets:[{data:[p,r,d]}]
-}
 });
-
-});
-
-// UPDATE
-function update(id,status){
-db.collection("requests").doc(id).update({status});
-}
-
-// NAV
-function showPage(page){
-document.getElementById("dashboard").style.display="none";
-document.getElementById("requests").style.display="none";
-document.getElementById(page).style.display="block";
-}
 </script>
 
 </body>
