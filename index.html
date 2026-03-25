@@ -2,141 +2,116 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MLSN FUTURE SYSTEM</title>
+<title>MLSN Delivery System</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
 
 <style>
 body{
 margin:0;
-font-family:'Orbitron',sans-serif;
-background:linear-gradient(to bottom,#020617,#0f172a);
-color:white;
-}
-
-/* HERO */
-.hero{
-height:260px;
-background:linear-gradient(135deg,#0f172a,#1e293b);
+font-family:'Poppins',sans-serif;
+background:#f3f4f6;
 display:flex;
+}
+
+/* SIDEBAR */
+.sidebar{
+width:70px;
+background:#111;
+color:white;
+height:100vh;
+display:flex;
+flex-direction:column;
 align-items:center;
-justify-content:space-between;
-padding:25px;
+padding-top:20px;
+}
+.sidebar div{
+margin:20px 0;
+font-size:20px;
 }
 
-.hero h1{
-font-size:28px;
-letter-spacing:2px;
-}
-
-/* GRID */
-.grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:20px;
+/* MAIN */
+.main{
+flex:2;
 padding:20px;
 }
 
-/* CARD */
-.item{
-background:rgba(255,255,255,0.06);
-border-radius:20px;
-overflow:hidden;
-backdrop-filter:blur(15px);
-box-shadow:0 10px 40px rgba(0,0,0,0.6);
-transition:0.3s;
-}
-
-.item:hover{
-transform:translateY(-5px) scale(1.02);
-}
-
-/* IMAGE */
-.img{
-height:140px;
-background:linear-gradient(135deg,#1e293b,#334155);
+/* HEADER */
+.header{
 display:flex;
-align-items:center;
-justify-content:center;
-font-size:12px;
-color:#aaa;
+justify-content:space-between;
+margin-bottom:15px;
 }
 
-/* CONTENT */
-.content{
+/* CARD */
+.card{
+background:white;
 padding:15px;
+border-radius:15px;
+margin-bottom:15px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
-.title{
-font-size:16px;
-margin-bottom:5px;
-}
-
-.loc{
-font-size:12px;
-opacity:0.6;
+/* PACKAGE LIST */
+.package{
+padding:10px;
+border-bottom:1px solid #eee;
 }
 
 /* STATUS */
 .status{
-margin-top:10px;
-display:inline-block;
-padding:5px 10px;
+padding:4px 10px;
 border-radius:10px;
-font-size:11px;
+font-size:12px;
 }
-.pending{background:#64748b;}
-.released{background:#22c55e;}
-.delayed{background:#ef4444;}
+.pending{background:#ddd;}
+.transit{background:#60a5fa;color:white;}
+.delivered{background:#22c55e;color:white;}
 
-/* BUTTON */
-.btn{
-background:#7c3aed;
-padding:10px;
-border:none;
-border-radius:10px;
-color:white;
-margin-top:10px;
-width:100%;
-}
-
-/* LOGIN */
-#login{
-display:flex;
-justify-content:center;
-align-items:center;
+/* MAP */
+.map{
+flex:1;
+background:#e5e7eb;
 height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:18px;
 }
 
-.login-card{
-background:#1e293b;
-padding:25px;
-border-radius:20px;
-width:280px;
-box-shadow:0 10px 30px rgba(0,0,0,0.6);
-}
-
+/* FORM */
 input{
 width:100%;
 padding:10px;
 margin-top:10px;
 border-radius:10px;
+border:1px solid #ddd;
+}
+
+button{
+margin-top:10px;
+padding:10px;
+width:100%;
 border:none;
+border-radius:10px;
+background:#7c3aed;
+color:white;
 }
 
-/* CHART */
-canvas{
-margin:15px;
-}
-
-/* FORM */
-.form{
-padding:15px;
+/* LOGIN */
+#login{
+position:absolute;
+width:100%;
+height:100%;
+display:flex;
+justify-content:center;
+align-items:center;
+background:#111;
+color:white;
 }
 </style>
 </head>
@@ -145,32 +120,47 @@ padding:15px;
 
 <!-- LOGIN -->
 <div id="login">
-<div class="login-card">
-<h3>MLSN LOGIN</h3>
+<div>
+<h2>MLSN Login</h2>
 <input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-<button class="btn" onclick="loginUser()">LOGIN</button>
+<input id="password" type="password">
+<button onclick="login()">Login</button>
 </div>
 </div>
 
-<!-- APP -->
-<div id="app" style="display:none">
-
-<div class="hero">
-<h1>MLSN SYSTEM</h1>
-<button class="btn" onclick="logout()">LOGOUT</button>
+<!-- SIDEBAR -->
+<div class="sidebar">
+<div>🏠</div>
+<div>📦</div>
+<div>⚙️</div>
 </div>
 
-<canvas id="chart"></canvas>
+<!-- MAIN -->
+<div class="main">
 
-<div class="form">
-<input id="name" placeholder="Franchisee Name">
-<input id="loc" placeholder="Location">
-<button class="btn" onclick="addData()">ADD PACKAGE</button>
+<div class="header">
+<h2>MLSN Dashboard</h2>
+<button onclick="logout()">Logout</button>
 </div>
 
-<div id="grid" class="grid"></div>
+<div class="card">
+<h3>Add Package</h3>
+<input id="name" placeholder="Franchisee">
+<input id="location" placeholder="Location">
+<input id="date" type="date">
+<button onclick="add()">Add</button>
+</div>
 
+<div class="card">
+<h3>Packages</h3>
+<div id="list"></div>
+</div>
+
+</div>
+
+<!-- MAP -->
+<div class="map">
+🗺️ MAP VIEW (Tracking Preview)
 </div>
 
 <script>
@@ -181,95 +171,60 @@ projectId:"mlsn-system-ce163"
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const db=firebase.firestore();
 const auth=firebase.auth();
 
-let chart;
-
 // LOGIN
-function loginUser(){
+function login(){
 auth.signInWithEmailAndPassword(
-document.getElementById("email").value,
-document.getElementById("password").value
-)
-.then(()=>{
-document.getElementById("login").style.display="none";
-document.getElementById("app").style.display="block";
-})
-.catch(e=>alert(e.message));
+email.value,password.value
+).then(()=>{
+login.style.display="none";
+});
 }
 
 // LOGOUT
-function logout(){
-location.reload();
-}
+function logout(){location.reload();}
 
 // ADD DATA
-function addData(){
+function add(){
 db.collection("requests").add({
-name:document.getElementById("name").value,
-location:document.getElementById("loc").value,
+name:name.value,
+location:location.value,
+date:date.value,
 status:"Pending",
-created:new Date()
+created:firebase.firestore.FieldValue.serverTimestamp()
 });
 }
 
-// REALTIME DISPLAY
+// REALTIME
 db.collection("requests").orderBy("created","desc")
 .onSnapshot(snap=>{
 let html="";
-let p=0,r=0,d=0;
-
 snap.forEach(doc=>{
-let x=doc.data();
-
-if(x.status==="Pending")p++;
-if(x.status==="Released")r++;
-if(x.status==="Delayed")d++;
+let d=doc.data();
 
 html+=`
-<div class="item">
+<div class="package">
+<b>${d.name}</b><br>
+${d.location}<br>
+${d.date || ""}<br>
 
-<div class="img">
-PACKAGE
-</div>
-
-<div class="content">
-<div class="title">${x.name}</div>
-<div class="loc">${x.location||""}</div>
-
-<select onchange="updateStatus('${doc.id}',this.value)">
-<option ${x.status==="Pending"?"selected":""}>Pending</option>
-<option ${x.status==="Released"?"selected":""}>Released</option>
-<option ${x.status==="Delayed"?"selected":""}>Delayed</option>
+<select onchange="update('${doc.id}',this.value)">
+<option ${d.status=="Pending"?"selected":""}>Pending</option>
+<option ${d.status=="Transit"?"selected":""}>Transit</option>
+<option ${d.status=="Delivered"?"selected":""}>Delivered</option>
 </select>
 
-<div class="status ${x.status.toLowerCase()}">${x.status}</div>
-
-</div>
+<span class="status ${d.status.toLowerCase()}">${d.status}</span>
 </div>
 `;
 });
-
-document.getElementById("grid").innerHTML=html;
-
-if(chart) chart.destroy();
-
-chart=new Chart(document.getElementById("chart"),{
-type:"doughnut",
-data:{
-labels:["Pending","Released","Delayed"],
-datasets:[{
-data:[p,r,d]
-}]
-}
-});
-
+list.innerHTML=html;
 });
 
 // UPDATE STATUS
-function updateStatus(id,status){
+function update(id,status){
 db.collection("requests").doc(id).update({status});
 }
 </script>
