@@ -2,39 +2,201 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MLSN Delivery System</title>
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <style>
-body{
-margin:0;
-font-family:'Poppins',sans-serif;
-background:#f3f4f6;
-display:flex;
-}
+body{margin:0;font-family:sans-serif;background:#0f172a;color:white;display:flex}
 
 /* SIDEBAR */
-.sidebar{
-width:70px;
-background:#111;
-color:white;
-height:100vh;
-display:flex;
-flex-direction:column;
-align-items:center;
-padding-top:20px;
-}
-.sidebar div{
-margin:20px 0;
-font-size:20px;
-}
+.sidebar{width:200px;background:#111;height:100vh;padding:20px}
+.sidebar button{width:100%;margin-top:10px;padding:10px;background:#1e293b;color:white;border:none}
 
 /* MAIN */
+.main{flex:2;padding:20px}
+
+/* MAP */
+#map{flex:1;height:100vh}
+
+/* CARD */
+.card{background:#1e293b;padding:15px;border-radius:10px;margin-bottom:10px}
+
+/* STATUS */
+.status{padding:5px 10px;border-radius:10px;font-size:12px}
+.pending{background:#64748b}
+.transit{background:#3b82f6}
+.delivered{background:#22c55e}
+
+/* LOGIN */
+#login{position:absolute;width:100%;height:100%;background:#020617;display:flex;justify-content:center;align-items:center}
+.login-box{background:#1e293b;padding:20px;border-radius:10px;width:250px}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+<div class="login-box">
+<h3>Login</h3>
+<input id="user" placeholder="Username (admin_, ops_, acct_)">
+<input id="pass" type="password">
+<button onclick="register()">Register</button>
+<button onclick="login()">Login</button>
+</div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+<h3>MLSN</h3>
+<button onclick="show('admin')">Admin</button>
+<button onclick="show('ops')">Operations</button>
+<button onclick="show('acct')">Accounting</button>
+<button onclick="logout()">Logout</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- ADMIN -->
+<div id="admin" class="card">
+<h3>Admin Dashboard</h3>
+
+<input id="name" placeholder="Name">
+<input id="location" placeholder="Location">
+<input id="date" type="date">
+<button onclick="add()">Add Package</button>
+
+<div id="adminList"></div>
+</div>
+
+<!-- OPS -->
+<div id="ops" class="card" style="display:none">
+<h3>Operations Dashboard</h3>
+<div id="opsList"></div>
+</div>
+
+<!-- ACCOUNTING -->
+<div id="acct" class="card" style="display:none">
+<h3>Accounting Dashboard</h3>
+<div id="acctList"></div>
+<h4>Total Delivered: <span id="total"></span></h4>
+</div>
+
+</div>
+
+<div id="map"></div>
+
+<script>
+const gun = Gun({peers:["https://gun-manhattan.herokuapp.com/gun"]});
+const user = gun.user();
+const db = gun.get("mlsn-packages");
+
+let role="";
+
+// LOGIN
+function register(){
+user.create(user.value, pass.value, ack=>{
+if(ack.err) alert(ack.err);
+else alert("Registered");
+});
+}
+
+function login(){
+user.auth(user.value, pass.value, ack=>{
+if(ack.err) alert(ack.err);
+else{
+login.style.display="none";
+
+// ROLE DETECT
+if(user.value.startsWith("admin")) role="admin";
+else if(user.value.startsWith("ops")) role="ops";
+else role="acct";
+
+show(role);
+}
+});
+}
+
+function logout(){location.reload();}
+
+// SHOW DASHBOARD
+function show(x){
+admin.style.display="none";
+ops.style.display="none";
+acct.style.display="none";
+
+document.getElementById(x).style.display="block";
+}
+
+// ADD PACKAGE
+function add(){
+let loc = location.value.toLowerCase();
+let delivery = loc.includes("manila") ? "Lalamove" : "Bus";
+
+db.set({
+name:name.value,
+location:location.value,
+date:date.value,
+delivery:delivery,
+status:"Pending",
+price: Math.floor(Math.random()*500)+100
+});
+}
+
+// MAP
+let map=L.map('map').setView([14.5995,120.9842],6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+// DISPLAY
+db.map().on((data,id)=>{
+if(!data) return;
+
+// ADMIN VIEW
+adminList.innerHTML += `
+<div>
+<b>${data.name}</b> - ${data.location} (${data.delivery})
+</div>
+`;
+
+// OPS VIEW
+opsList.innerHTML += `
+<div>
+<b>${data.name}</b><br>
+<select onchange="update('${id}',this.value)">
+<option ${data.status=="Pending"?"selected":""}>Pending</option>
+<option ${data.status=="Transit"?"selected":""}>Transit</option>
+<option ${data.status=="Delivered"?"selected":""}>Delivered</option>
+</select>
+<span class="status ${data.status.toLowerCase()}">${data.status}</span>
+</div>
+`;
+
+// ACCOUNTING VIEW
+if(data.status=="Delivered"){
+acctList.innerHTML += `
+<div>${data.name} - ₱${data.price}</div>
+`;
+total.innerText = parseInt(total.innerText||0) + data.price;
+}
+
+// MAP MARKER
+let lat=14+Math.random()*5;
+let lng=120+Math.random()*5;
+L.marker([lat,lng]).addTo(map);
+});
+
+// UPDATE
+function update(id,status){
+gun.get("mlsn-packages").get(id).put({status});
+}
+</script>
+
+</body>
+</html>/* MAIN */
 .main{
 flex:2;
 padding:20px;
