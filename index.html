@@ -5,6 +5,206 @@
 
 <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+
+<style>
+body{margin:0;font-family:sans-serif;background:#0f172a;color:white}
+
+/* LOGIN */
+#login{
+position:absolute;width:100%;height:100%;
+display:flex;justify-content:center;align-items:center;
+background:#020617
+}
+.box{background:#1e293b;padding:20px;border-radius:10px;width:260px}
+
+/* SIDEBAR */
+.sidebar{width:200px;background:#111;height:100vh;float:left;padding:10px}
+.sidebar button{width:100%;margin-top:10px;padding:10px;background:#1e293b;color:white;border:none}
+
+/* MAIN */
+.main{margin-left:200px;padding:15px}
+
+/* CARD */
+.card{background:#1e293b;padding:15px;border-radius:10px;margin-bottom:10px}
+
+input,select{width:100%;padding:10px;margin-top:10px;border:none;border-radius:8px}
+button{width:100%;margin-top:10px;padding:10px;background:#7c3aed;color:white;border:none}
+
+/* STATUS */
+.status{padding:5px 10px;border-radius:10px;font-size:12px}
+.pending{background:#64748b}
+.transit{background:#3b82f6}
+.delivered{background:#22c55e}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+<div class="box">
+<h3>MLSN LOGIN</h3>
+<input id="username" placeholder="admin_, ops_, acct_">
+<input id="password" type="password">
+<button onclick="login()">Login</button>
+</div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+<h3>MLSN</h3>
+<button onclick="show('admin')">Admin</button>
+<button onclick="show('ops')">Operations</button>
+<button onclick="show('acct')">Accounting</button>
+<button onclick="logout()">Logout</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<div id="admin" class="card">
+<h3>Admin Dashboard</h3>
+
+<input id="newUser" placeholder="Create Username">
+<input id="newPass" type="password">
+<button onclick="createUser()">Create User</button>
+
+<hr>
+
+<input id="name" placeholder="Package Name">
+<input id="location" placeholder="Location">
+<input id="date" type="date">
+<button onclick="add()">Add Package</button>
+
+<div id="adminList"></div>
+</div>
+
+<div id="ops" class="card" style="display:none">
+<h3>Operations</h3>
+<div id="opsList"></div>
+</div>
+
+<div id="acct" class="card" style="display:none">
+<h3>Accounting</h3>
+<div id="acctList"></div>
+<h4>Total: ₱<span id="total">0</span></h4>
+</div>
+
+</div>
+
+<script>
+// LOCAL DATABASE (NO PEERS)
+const gun = Gun();
+const user = gun.user();
+const db = gun.get("mlsn-packages");
+
+let role="";
+
+// FIRST ADMIN SETUP (AUTO CREATE)
+user.create("admin_main","123456");
+
+// LOGIN
+function login(){
+user.auth(username.value,password.value,ack=>{
+if(ack.err) return alert(ack.err);
+
+document.getElementById("login").style.display="none";
+
+if(username.value.startsWith("admin")) role="admin";
+else if(username.value.startsWith("ops")) role="ops";
+else role="acct";
+
+show(role);
+});
+}
+
+// ADMIN CREATES USERS
+function createUser(){
+if(role!=="admin") return alert("Admin only!");
+
+user.create(newUser.value,newPass.value,ack=>{
+if(ack.err) return alert(ack.err);
+alert("User created!");
+});
+}
+
+// ADD PACKAGE
+function add(){
+let loc = location.value.toLowerCase();
+let delivery = loc.includes("manila") ? "Lalamove" : "Bus";
+
+db.set({
+name:name.value,
+location:location.value,
+date:date.value,
+delivery:delivery,
+status:"Pending",
+price:Math.floor(Math.random()*500)+100
+});
+}
+
+// SWITCH VIEW
+function show(x){
+admin.style.display="none";
+ops.style.display="none";
+acct.style.display="none";
+document.getElementById(x).style.display="block";
+}
+
+// LOGOUT
+function logout(){location.reload();}
+
+// RENDER DATA
+function render(){
+adminList.innerHTML="";
+opsList.innerHTML="";
+acctList.innerHTML="";
+total.innerText=0;
+
+db.map().once((d,id)=>{
+if(!d) return;
+
+// ADMIN
+adminList.innerHTML+=`<div>${d.name} - ${d.location}</div>`;
+
+// OPS
+opsList.innerHTML+=`
+<div>
+${d.name}<br>
+<select onchange="update('${id}',this.value)">
+<option ${d.status=="Pending"?"selected":""}>Pending</option>
+<option ${d.status=="Transit"?"selected":""}>Transit</option>
+<option ${d.status=="Delivered"?"selected":""}>Delivered</option>
+</select>
+<span class="status ${d.status.toLowerCase()}">${d.status}</span>
+</div>
+`;
+
+// ACCOUNTING
+if(d.status=="Delivered"){
+acctList.innerHTML+=`<div>${d.name} - ₱${d.price}</div>`;
+total.innerText=parseInt(total.innerText)+d.price;
+}
+});
+}
+
+// AUTO UPDATE
+db.map().on(()=>render());
+
+// UPDATE STATUS
+function update(id,status){
+gun.get("mlsn-packages").get(id).put({status});
+}
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
